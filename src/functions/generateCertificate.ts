@@ -1,8 +1,8 @@
-import { join } from 'path'; 
-import { readFileSync } from 'fs';
-import { compile } from 'handlebars';
+import path from 'path'; 
+import fs from 'fs';
+import handlebars from 'handlebars';
 import dayjs from 'dayjs';
-import { puppeteer,args, defaultViewport, executablePath } from 'chrome-aws-lambda'
+import chromium from 'chrome-aws-lambda'
 import { document } from '../utils/dynamodbClient';
 
 interface ICreateCertificate {
@@ -20,7 +20,7 @@ interface ITemplate {
 }
 
 const compileFunction = async function (data:ITemplate) {
-  const filePath = join(PATH, 'src','templates', 'certificate.hbs');
+  const filePath = join(process.cwd(), 'src','templates', 'certificate.hbs');
 
   const html = readFileSync(filePath, 'utf-8');
 
@@ -42,7 +42,7 @@ export const handle = async (event) => {
     }
   }).promise()
 
-  const medalPath = join(PATH, 'src', 'templates', 'selo.png');
+  const medalPath = join(process.cwd(), 'src', 'templates', 'selo.png');
   const medal = readFileSync(medalPath, 'base64')
 
   const data: ITemplate = {
