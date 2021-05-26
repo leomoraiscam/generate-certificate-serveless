@@ -20,14 +20,11 @@ interface ITemplate {
 }
 
 const compileFunction = async function (data:ITemplate) {
-  const filePath = join(process.cwd(), 'src','templates', 'certificate.hbs');
+  const filePath = path.join(process.cwd(), 'src','templates', 'certificate.hbs');
 
-  const html = readFileSync(filePath, 'utf-8');
+  const html = fs.readFileSync(filePath, 'utf-8');
 
-  const hand = compile(html)(data)
-
-  return hand;
-
+  return handlebars.compile(html)(data)
 }
 
 export const handle = async (event) => {
@@ -42,8 +39,8 @@ export const handle = async (event) => {
     }
   }).promise()
 
-  const medalPath = join(process.cwd(), 'src', 'templates', 'selo.png');
-  const medal = readFileSync(medalPath, 'base64')
+  const medalPath = path.join(process.cwd(), 'src', 'templates', 'selo.png');
+  const medal = fs.readFileSync(medalPath, 'base64');
 
   const data: ITemplate = {
     date: dayjs().format('DD/MM/YYYY'),
@@ -51,20 +48,20 @@ export const handle = async (event) => {
     name,
     id,
     medal
-  }
+  };
 
-  const content = await compileFunction(data)
+  const content = await compileFunction(data);
 
-  const browser = await puppeter.launch({
+  const browser = await chromium.puppeteer.launch({
     headless: true,
-    args: args,
-    defaultViewport: defaultViewport,
-    executablePath: await executablePath
-  })
+    args: chromium.args,
+    defaultViewport: chromium.defaultViewport,
+    executablePath: await chromium.executablePath
+  });
 
   const page = await browser.newPage();
 
-  await page.setContent(content)
+  await page.setContent(content);
 
   const IS_OFF = true;
 
