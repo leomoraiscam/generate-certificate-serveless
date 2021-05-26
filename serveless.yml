@@ -1,6 +1,0 @@
-service:
-  name: s3Certificate
-
-plugins:
-  - serverless-offline
-  - serverless-webpack
