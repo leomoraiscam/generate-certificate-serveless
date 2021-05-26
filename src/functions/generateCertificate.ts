@@ -1,8 +1,8 @@
-import path from 'path'; 
-import fs from 'fs';
-import handlebars from 'handlebars';
+import { join } from 'path'; 
+import { readFileSync } from 'fs';
+import { compile } from 'handlebars';
 import dayjs from 'dayjs';
-//import chormiun from 'chrome-aws-lambda'
+import { puppeteer,args, defaultViewport, executablePath } from 'chrome-aws-lambda'
 import { document } from '../utils/dynamodbClient';
 
 interface ICreateCertificate {
@@ -19,14 +19,15 @@ interface ITemplate {
   medal: string;
 }
 
-const compile = async function (data:ITemplate) {
-  const filePath = path.join(process.cwd(), 'src','templates', 'certificate.hbs');
+const compileFunction = async function (data:ITemplate) {
+  const filePath = join(PATH, 'src','templates', 'certificate.hbs');
 
-  const html = fs.readFileSync(filePath, 'utf-8');
+  const html = readFileSync(filePath, 'utf-8');
 
-  const hand = handlebars.compile(html)(data)
+  const hand = compile(html)(data)
 
   return hand;
+
 }
 
 export const handle = async (event) => {
@@ -41,8 +42,8 @@ export const handle = async (event) => {
     }
   }).promise()
 
-  const medalPath = path.join(process.cwd(), 'src', 'templates', 'selo.png');
-  const medal = fs.readFileSync(medalPath, 'base64')
+  const medalPath = join(PATH, 'src', 'templates', 'selo.png');
+  const medal = readFileSync(medalPath, 'base64')
 
   const data: ITemplate = {
     date: dayjs().format('DD/MM/YYYY'),
@@ -52,9 +53,32 @@ export const handle = async (event) => {
     medal
   }
 
-  const content = await compile(data)
+  const content = await compileFunction(data)
 
-  return {
+  const browser = await puppeter.launch({
+    headless: true,
+    args: args,
+    defaultViewport: defaultViewport,
+    executablePath: await executablePath
+  })
+
+  const page = await browser.newPage();
+
+  await page.setContent(content)
+
+  const IS_OFF = true;
+
+  const pdf = await page.pdf({
+    format: 'a4',
+    landscape: true,
+    path: IS_OFF ? 'certificate.pdf' : null,
+    printBackground: true,
+    preferCSSPageSize: true
+  })
+
+  await browser.close()
+
+  return { 
     statusCode: 201,
     body: JSON.stringify({
       message: "Certificate Created"
