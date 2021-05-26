@@ -8,8 +8,8 @@ const options = {
 }
 
 const devOption = {
-  region: process.env.AWS_REGION,
-  endpoint: `https://dynamodb.${process.env.AWS_REGION}.amazonaws.com/`
+  region: 'us-east-1',
+  endpoint: `https://dynamodb.us-east-1.amazonaws.com/`
 }
 
 const isOffline = () => {
