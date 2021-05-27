@@ -82,12 +82,9 @@ export const handle = async (event) => {
 
   await page.setContent(content);
 
-  const IS_OFF = true;
-
   const pdf = await page.pdf({
     format: 'a4',
     landscape: true,
-    path: IS_OFF ? 'certificate.pdf' : null,
     printBackground: true,
     preferCSSPageSize: true
   });

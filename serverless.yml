@@ -10,6 +10,7 @@ custom:
   webpack:
     webpackConfig: ./webpack.config.js
     includeModules: true
+  
   dynamodb:
     stages:
       - dev
@@ -21,8 +22,17 @@ custom:
 
 provider:
   name: aws
+  region: us-east-1
   runtime: nodejs12.x
-  region: ${env:AWS_REGION}
+  iamRoleStatements:
+    - Effect: Allow 
+      Action:
+        - dynamodb:*
+      Resource: "*" 
+    - Effect: Allow
+      Action:
+        - s3:*
+      Resource: "*"
 
 functions:
   generateCertificate:
@@ -32,6 +42,12 @@ functions:
           path: /generateCertificate
           method: POST
           cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+          - dynamodb:PutItem
+        Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
 
   verifyCertificate:
     handler: src/functions/verifyCertificate.handle
@@ -40,3 +56,8 @@ functions:
           path: /verifyCertificate/{id}
           method: GET
           cors: true
+    iamRoleStatements:
+      - Effect: Allow
+        Action:
+          - dynamodb:Query
+        Resource: "arn:aws:dynamodb:${self.provider.region}:*:table/users_certificates"
