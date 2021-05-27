@@ -9,7 +9,7 @@ import { document } from '../utils/dynamodbClient';
 
 dotenv.config({
   path: path.join(__dirname, '../../.env')
-})
+});
 
 interface ICreateCertificate {
   id: string;
@@ -70,8 +70,6 @@ export const handle = async (event) => {
   await page.setContent(content);
 
   const IS_OFF = true;
-
-  console.log('ENV', process.env.AWS_REGION)
 
   const pdf = await page.pdf({
     format: 'a4',
