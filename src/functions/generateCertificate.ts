@@ -1,9 +1,15 @@
+import dotenv from 'dotenv';
 import path from 'path'; 
 import fs from 'fs';
 import handlebars from 'handlebars';
 import dayjs from 'dayjs';
 import chromium from 'chrome-aws-lambda'
+import { S3 } from 'aws-sdk';
 import { document } from '../utils/dynamodbClient';
+
+dotenv.config({
+  path: path.join(__dirname, '../../.env')
+})
 
 interface ICreateCertificate {
   id: string;
@@ -65,20 +71,36 @@ export const handle = async (event) => {
 
   const IS_OFF = true;
 
+  console.log('ENV', process.env.AWS_REGION)
+
   const pdf = await page.pdf({
     format: 'a4',
     landscape: true,
     path: IS_OFF ? 'certificate.pdf' : null,
     printBackground: true,
     preferCSSPageSize: true
-  })
+  });
 
-  await browser.close()
+  await browser.close();
+
+  const s3 = new S3({
+    region: 'us-east-1'
+  });
+
+  await s3.putObject({
+    Bucket: 'application-barber',
+    Key: `${id}.pdf`,
+    ACL: 'public-read',
+    Body: pdf,
+    ContentType: 'application/pdf'
+  }).promise();
+
 
   return { 
     statusCode: 201,
     body: JSON.stringify({
-      message: "Certificate Created"
+      message: "Certificate Created",
+      url: `https://application-barber.s3.amazonaws.com/${id}.pdf`
     }),
     headers:{
       "Content-Type":"application/json"
