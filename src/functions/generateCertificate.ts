@@ -92,11 +92,11 @@ export const handle = async (event) => {
   await browser.close();
 
   const s3 = new S3({
-    region: 'us-east-1'
+    region: process.env.AWS_REGION
   });
 
   await s3.putObject({
-    Bucket: 'application-barber',
+    Bucket: process.env.AWS_S3_BUCKET,
     Key: `${id}.pdf`,
     ACL: 'public-read',
     Body: pdf,
@@ -108,7 +108,7 @@ export const handle = async (event) => {
     statusCode: 201,
     body: JSON.stringify({
       message: "Certificate Created",
-      url: `https://application-barber.s3.amazonaws.com/${id}.pdf`
+      url: `${process.env.AWS_BUCKET_URL}/${id}.pdf`
     }),
     headers:{
       "Content-Type":"application/json"

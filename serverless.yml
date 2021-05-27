@@ -16,13 +16,13 @@ custom:
       - dev
       - local
     start:
-      port: 8005
+      port: 8000
       inMemory: true
       migrate: true
 
 provider:
   name: aws
-  region: us-east-1
+  region: ${env:AWS_REGION}
   runtime: nodejs12.x
   iamRoleStatements:
     - Effect: Allow 

@@ -20,7 +20,7 @@ export const handle: APIGatewayProxyHandler = async (event) => {
       statusCode: 200,
       body: JSON.stringify({
         message: 'Valid certificate',
-        url: `https://application-barber.s3.amazonaws.com/${id}.pdf`
+        url: `${process.env.AWS_BUCKET_URL}/${id}.pdf`
       })
     }
   } 
